@@ -67,6 +67,7 @@ def add_sample_student():
        ('Teena', 'teena@gmail.com', 'HTML'),
        ('Meena', 'meena@gmail.com', 'CSS'),
        ('Reena', 'reena@gmail.com', 'JAVA'),
+       ('Reena', 'reena@gmail.com', 'JAVA'),
        ('Heena', 'heena@gmail.com', 'Python'),
     ]
     conn.executemany ( 
