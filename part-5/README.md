@@ -2,6 +2,8 @@
 
 ## One-Line Summary
 Switching to PostgreSQL/MySQL with environment configuration
+Note that here we are mentioning MySQL only for reference, we will be using PostgreSQL directly since it's a production grade database. 
+We'll use PGAdmin software to manage and view data from the database. 
 
 ## What You'll Learn
 - Connecting to PostgreSQL and MySQL
