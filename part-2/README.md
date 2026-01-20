@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 # Part 1: Basic Flask with SQLite Database
 
 ## One-Line Summary
