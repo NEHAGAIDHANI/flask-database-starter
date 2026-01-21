@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>School Records Overview</title>
+    <style>
+        /* Exact Styles from teachers.html */
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f0f4f8; }
+        h1 { color: #2c3e50; }
+        
+        /* Nav bar styling */
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 15px; color: #3498db; text-decoration: none; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+
+        /* Table styling to match Teachers box */
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            background: white; 
+            margin-top: 20px; 
+            margin-bottom: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        
+        /* Purple headers to match your teachers box */
+        th { background-color: #9b59b6; color: white; }
+        
+        /* Zebra striping */
+        tr:nth-child(even) { background-color: #f2f2f2; }
+
+        h2 { color: #2c3e50; margin-top: 30px; border-bottom: 2px solid #9b59b6; padding-bottom: 5px; }
+
+        /* The special badge for course names */
+        .course-badge { 
+            background: #e5c9f0; 
+            color: rgb(10, 10, 10); 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-size: 14px; 
+            display: inline-block;
+        }
+        
+        .empty { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>School Records Overview</h1>
+    <h4> Additional exercise - display list of students with course name and teacher name (taken from the course name) and vice versa</h4>
+    
+    <nav>
+        <a href="{{ url_for('index') }}">Students</a>
+        <a href="{{ url_for('courses') }}">Courses</a>
+        <a href="{{ url_for('teachers') }}">Teachers</a>
+        <a href="{{ url_for('display_all') }}">Display All</a>
+    </nav>
+
+    <h2>1. Student List</h2>
+    <h4>The following table displays each student's name along with their specifically assigned course and corresponding teacher.</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Enrolled Course</th>
+                <th>Course Teacher(s)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.name }}</td>
+                <td>
+                    {% if student.course %}
+                        <span class="course-badge">{{ student.course.name }}</span>
+                    {% else %}
+                        <span class="empty">No Course</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if student.course and student.course.teachers %}
+                        {% for teacher in student.course.teachers %}
+                            {{ teacher.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="empty">No Teacher</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>2. Teacher List</h2>
+    <h4>The following table displays each teacher's name along with the course they lead and the list of students currently enrolled in that course.</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Teacher Name</th>
+                <th>Course Taught</th>
+                <th>Student Roster</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            <tr>
+                <td>{{ teacher.name }}</td>
+                <td>
+                    {% if teacher.course %}
+                        <span class="course-badge">{{ teacher.course.name }}</span>
+                    {% else %}
+                        <span class="empty">No Course</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if teacher.course and teacher.course.students %}
+                        {% for student in teacher.course.students %}
+                            {{ student.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="empty">No Students</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('index') }}" class="btn btn-edit">← Back to Home</a>
+</div>

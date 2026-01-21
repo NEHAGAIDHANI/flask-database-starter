@@ -17,7 +17,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy  # Import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'
+app.secret_key = 'c909ff69' #a secret key is a random string of characters used to encrypt and secure data that moves between the server and the user's browser
 
 # =============================================================================
 # DATABASE CONFIGURATION
@@ -32,6 +32,7 @@ db = SQLAlchemy(app)  # Initialize SQLAlchemy with app
 # MODELS (Python Classes = Database Tables)
 # =============================================================================
 
+#====Courses====
 class Course(db.Model):  # Course table
     id = db.Column(db.Integer, primary_key=True)  # Auto-increment ID
     name = db.Column(db.String(100), nullable=False)  # Course name
@@ -39,11 +40,13 @@ class Course(db.Model):  # Course table
 
     # Relationship: One Course has Many Students
     students = db.relationship('Student', backref='course', lazy=True)
+    # Relationship to include Teacher field
+    teachers = db.relationship('Teacher', backref='course', lazy=True) 
 
     def __repr__(self):  # How to display this object
         return f'<Course {self.name}>'
 
-
+#====Students====
 class Student(db.Model):  # Student table
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -55,6 +58,18 @@ class Student(db.Model):  # Student table
     def __repr__(self):
         return f'<Student {self.name}>'
 
+ #=====Teachers=====   
+class Teacher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+
+    # Foreign Key: Links teacher to a course
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Teacher {self.name}>'
+    
 
 # =============================================================================
 # ROUTES - Using ORM instead of raw SQL
@@ -65,6 +80,7 @@ def index():
     # OLD WAY (raw SQL): conn.execute('SELECT * FROM students').fetchall()
     # NEW WAY (ORM):
     students = Student.query.all()  # Get all students
+
     return render_template('index.html', students=students)
 
 
@@ -72,7 +88,6 @@ def index():
 def courses():
     all_courses = Course.query.all()  # Get all courses
     return render_template('courses.html', courses=all_courses)
-
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_student():
@@ -137,6 +152,66 @@ def add_course():
         return redirect(url_for('courses'))
 
     return render_template('add_course.html')
+
+#=====Routes for teachers similar to Students=====
+@app.route('/teachers')
+def teachers():
+    teachers = Teacher.query.all()
+    return render_template('teachers.html', teachers=teachers)
+
+@app.route('/add-teacher', methods=['GET', 'POST'])
+def add_teacher():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        course_id = request.form['course_id']
+
+        new_teacher = Teacher(name=name, email=email, course_id=course_id)  # Create object
+        db.session.add(new_teacher)  # Add to session
+        db.session.commit()  # Save to database
+
+        flash('teacher added successfully!', 'success')
+        return redirect(url_for('teachers'))
+
+    courses = Course.query.all()  # Get courses for dropdown
+    return render_template('add_teacher.html', courses=courses)
+
+@app.route('/edit-teacher/<int:id>', methods=['GET', 'POST'])
+def edit_teacher(id):
+    # OLD WAY: conn.execute('SELECT * FROM teachers WHERE id = ?', (id,))
+    # NEW WAY:
+    teacher = Teacher.query.get_or_404(id)  # Get by ID or show 404 error
+
+    if request.method == 'POST':
+        teacher.name = request.form['name']  # Just update the object
+        teacher.email = request.form['email']
+        teacher.course_id = request.form['course_id']
+
+        db.session.commit()  # Save changes
+        flash('Teacher updated!', 'success')
+        return redirect(url_for('teachers'))
+
+    courses = Course.query.all()
+    return render_template('edit_teacher.html', teacher=teacher, courses=courses)
+
+@app.route('/delete-teacher/<int:id>')
+def delete_teacher(id):
+    teacher = Teacher.query.get_or_404(id)
+    db.session.delete(teacher)  # Delete the object
+    db.session.commit()
+
+    flash('Teacher deleted!', 'danger')
+    return redirect(url_for('teachers'))
+
+#This route is for displaying all student,teacher records
+# Additional exercise - display list of students with course name and teacher name (taken from the course name) and vice versa
+@app.route('/display-all')
+def display_all():
+    # Combining order_by and limit
+    all_students = Student.query.order_by(Student.name).limit(10).all()
+    all_teachers = Teacher.query.order_by(Teacher.name).all()
+    # These names (students/teachers) must match the names in your HTML {% for %} loops
+    return render_template('display_all.html', students=all_students, teachers=all_teachers)
 
 
 # =============================================================================
