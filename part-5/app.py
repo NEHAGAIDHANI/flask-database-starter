@@ -1,4 +1,4 @@
-"""
+""""
 Part 5: PostgreSQL/MySQL with Environment Configuration
 ========================================================
 Switch from SQLite to production-ready databases!
@@ -12,15 +12,23 @@ What You'll Learn:
 
 Prerequisites: Complete all previous parts
 Install: pip install psycopg2-binary pymysql python-dotenv
-"""
 
+"""
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv  # Load .env file
+from dotenv import load_dotenv
+
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')
 
 # Load environment variables from .env file
 load_dotenv()
+# ADD THIS LINE TO FIND THE FILE LOCATION:
+print(f"DEBUG: Looking for .env file in: {os.getcwd()}") 
+print(f"DEBUG: Connecting to DB with URL: {os.getenv('DATABASE_URL')}")
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')  # Get from env or use fallback
@@ -31,10 +39,17 @@ app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')  # Get from env 
 
 # Get database URL from environment variable
 # Falls back to SQLite if not set
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///default.db')
+# Force the app to use your PostgreSQL connection string
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if not DATABASE_URL:
+    raise ValueError("No DATABASE_URL found! Check if your .env file is named correctly.")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+print(f"DEBUG: The app is now using: {DATABASE_URL}")
 
 # Connection pool settings (for production)
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
