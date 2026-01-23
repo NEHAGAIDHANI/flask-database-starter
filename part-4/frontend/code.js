@@ -1,283 +1,182 @@
-const API_BASE_URL = 'http://127.0.0.1:5000/api'; // Update if your port is different
+const API = "http://127.0.0.1:5000/api";
 
-// Initialize data on load
+// 1. Initial Load
 document.addEventListener('DOMContentLoaded', () => {
-    loadAuthors();
-    loadBooks();
+    fetchBooks(1);
+    fetchAuthors(1);
+    loadDropdowns(); 
 });
 
-// ================= AUTHOR FUNCTIONS =================
-
-async function loadAuthors() {
+// 2. Load Authors into the Dropdown for Adding Books
+async function loadDropdowns() {
     try {
-        const response = await fetch(`${API_BASE_URL}/authors`);
-        const data = await response.json();
-        
-        const list = document.getElementById('author-list');
-        const dropdown = document.getElementById('book-author-id');
-        
-        list.innerHTML = '';
-        dropdown.innerHTML = '<option value="">-- Select an Author --</option>';
+        const res = await fetch(`${API}/authors`);
+        const data = await res.json();
+        const dropdown = document.getElementById("bookAuthor");
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Select an author</option>';
+            (data.authors || []).forEach(a => {
+                dropdown.innerHTML += `<option value="${a.id}">${a.name}</option>`;
+            });
+        }
+    } catch (err) { console.error("Dropdown load failed:", err); }
+}
 
-        data.authors.forEach(auth => {
-            // Fill Table
-            list.innerHTML += `
-                <tr>
-                    <td>${auth.id}</td>
-                    <td>${auth.name}</td>
-                    <td>${auth.email}</td>
-                    <td>${auth.bio}</td>
-                    <td>${auth.city}</td>
-                    <td>
-                        <button class="action-btn edit-btn" onclick="editAuthor(${auth.id})"> Edit </button>
-                        <button class="action-btn delete-btn" onclick="deleteAuthor(${auth.id})"> Delete </button>
-                    </td>
-                </tr>`; 
+/* ========== BOOK COLLECTION LOGIC ========== */
+let currentPage = 1;
+const perPage = 5;
+
+async function fetchBooks(page = 1) {
+    try {
+        const response = await fetch(`${API}/books-with-pagination?page=${page}&per_page=${perPage}`);
+        const data = await response.json();
+
+        if (data.success) {
+            renderBooksTable(data.books);
+            currentPage = data.page;
             
-            // Fill Book Form Dropdown
-            dropdown.innerHTML += `<option value="${auth.id}">${auth.name}</option>`;
-        });
-    } catch (err) { console.error("Error loading authors:", err); }
+            // Updates Total Books Stat Card directly from paginated data
+            document.getElementById('statBooks').innerText = data.total_records || 0;
+            document.getElementById('pageInfo').innerText = `Page ${data.page} of ${data.total_pages}`;
+            
+            document.getElementById('prevBtn').disabled = (currentPage <= 1);
+            document.getElementById('nextBtn').disabled = (currentPage >= data.total_pages);
+        }
+    } catch (error) { console.error("Book fetch error:", error); }
 }
 
-async function addAuthor() {
-    const payload = {
-        name: document.getElementById('auth-name').value,
-        email: document.getElementById('auth-email').value,
-        city: document.getElementById('auth-city').value,
-        bio: document.getElementById('auth-bio').value
-    };
-
-    const response = await fetch(`${API_BASE_URL}/authors`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+function renderBooksTable(booksList) {
+    const tableBody = document.getElementById('booksTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = ''; 
+    booksList.forEach(book => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${book.id}</td>
+                <td>${book.title}</td>
+                <td>${book.author || 'Unknown'}</td>
+                <td>${book.year || '-'}</td>
+                <td>${book.isbn || '-'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editBook(${book.id}, '${book.title}', '${book.year}', '${book.isbn}', ${book.author_id})">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteBook(${book.id})">Delete</button>
+                </td>
+            </tr>`;
     });
-
-    if (response.ok) {
-        alert("Author added!");
-        loadAuthors(); // Refresh UI
-    }
 }
 
-// --------- Edit Author Function ---------
-async function editAuthor(id) {
-    // 1. Get existing data (Optional but better for user experience)
-    const name = prompt("Enter new Name:");
-    const email = prompt("Enter new Email:");
-    const city = prompt("Enter new City:");
-    const bio = prompt("Enter new Bio:");
+function changePage(step) { fetchBooks(currentPage + step); }
 
-    // If the user cancels or leaves name/email empty, stop here
-    if (!name || !email) {
-        alert("Name and Email are required for update.");
-        return;
-    }
+/* ========== AUTHOR REGISTRY LOGIC ========== */
+/* ========== AUTHOR REGISTRY LOGIC ========== */
+let currentAuthorPage = 1;
+const authorsPerPage = 5;
 
-    const payload = { name, email, city, bio };
-
+async function fetchAuthors(page = 1) {
     try {
-        const response = await fetch(`${API_BASE_URL}/authors/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("Author updated successfully!");
-            loadAuthors(); // Refresh table
-        } else {
-            alert("Update failed: " + result.error);
-        }
-    } catch (err) {
-        console.error("Error updating author:", err);
-    }
-}
-
-// --------- Delete Author Function (Verify Spelling) ---------
-async function deleteAuthor(id) {
-    if (confirm("Are you sure you want to delete this author?")) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/authors/${id}`, { 
-                method: 'DELETE' 
-            });
-
-            if (response.ok) {
-                alert("Author deleted!");
-                loadAuthors(); // Refresh UI
-            } else {
-                const result = await response.json();
-                alert("Error: " + result.error);
-            }
-        } catch (err) {
-            console.error("Error deleting author:", err);
-        }
-    }
-}// --------- Edit Author Function ---------
-async function editAuthor(id) {
-    // 1. Get existing data (Optional but better for user experience)
-    const name = prompt("Enter new Name:");
-    const email = prompt("Enter new Email:");
-    const city = prompt("Enter new City:");
-    const bio = prompt("Enter new Bio:");
-
-    // If the user cancels or leaves name/email empty, stop here
-    if (!name || !email) {
-        alert("Name and Email are required for update.");
-        return;
-    }
-
-    const payload = { name, email, city, bio };
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/authors/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("Author updated successfully!");
-            loadAuthors(); // Refresh table
-        } else {
-            alert("Update failed: " + result.error);
-        }
-    } catch (err) {
-        console.error("Error updating author:", err);
-    }
-}
-
-// --------- Delete Author Function (Verify Spelling) ---------
-
-async function deleteAuthor(id) {
-    if (confirm("Are you sure you want to delete this author?")) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/authors/${id}`, { 
-                method: 'DELETE' 
-            });
-
-            if (response.ok) {
-                alert("Author deleted!");
-                loadAuthors(); // Refresh UI
-            } else {
-                const result = await response.json();
-                alert("Error: " + result.error);
-            }
-        } catch (err) {
-            console.error("Error deleting author:", err);
-        }
-    }
-}
-
-// ================= BOOK FUNCTIONS =================
-
-async function loadBooks() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/books`);
+        const response = await fetch(`${API}/authors-with-pagination?page=${page}&per_page=${authorsPerPage}`);
         const data = await response.json();
-        const list = document.getElementById('book-list');
-        list.innerHTML = '';
 
-        data.books.forEach(book => {
-            list.innerHTML += `
-                <tr>
-                    <td>${book.id}</td>
-                    <td>${book.title}</td>
-                    <td>${book.year || 'N/A'}</td>
-                    <td>${book.isbn || 'N/A'}</td>
-                    <td>
-                        <button class="action-btn edit-btn" onclick="editBook(${book.id})"> Edit </button>
-                        <button class="action-btn delete-btn" onclick="deleteBook(${book.id})"> Delete </button>
-                    </td>
-                </tr>`;
-        });
-    } catch (err) { console.error("Error loading books:", err); }
+        if (data.success) {
+            renderAuthorsTable(data.authors);
+            currentAuthorPage = data.page;
+
+            // Updates the Page text below the table
+            document.getElementById('authorPageInfo').innerText = `Page ${data.page} of ${data.total_pages}`;
+            
+            // Updates the Total Authors card at the top
+            document.getElementById("statAuthors").innerText = data.total_records;
+            
+            document.getElementById('prevAuthorBtn').disabled = (currentAuthorPage <= 1);
+            document.getElementById('nextAuthorBtn').disabled = (currentAuthorPage >= data.total_pages);
+        }
+    } catch (error) {
+        console.error("Author pagination error:", error);
+    }
 }
+function renderAuthorsTable(authorsList) {
+    const tableBody = document.getElementById('authorsTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = ''; 
 
-async function addBook() {
-    const payload = {
-        title: document.getElementById('book-title').value,
-        author_id: document.getElementById('book-author-id').value, // Matches your ForeignKey
-        year: document.getElementById('book-year').value,
-        isbn: document.getElementById('book-isbn').value
-    };
-
-    const response = await fetch(`${API_BASE_URL}/books`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    authorsList.forEach(author => {
+        // Corrected with backticks ( ` ) below
+        tableBody.innerHTML += `
+            <tr>
+                <td>${author.id}</td>
+                <td>${author.name}</td>
+                <td>${author.city || '-'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-warning" 
+                        onclick="editAuthor(${author.id}, '${author.name}', '${author.city}', '${author.bio}')">
+                        Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" 
+                        onclick="deleteAuthor(${author.id})">
+                        Delete
+                    </button>
+                </td>
+            </tr>`;
     });
-
-    if (response.ok) {
-        alert("Book registered!");
-        loadBooks();
-    } else {
-        const err = await response.json();
-        alert("Error: " + err.error);
-    }
+}
+function changeAuthorPage(step) {
+    fetchAuthors(currentAuthorPage + step);
 }
 
-// --------- Edit Book Function ---------
-async function editBook(id) {
-    // 1. Collect new data via prompts
-    const title = prompt("Enter new Book Title:");
-    const year = prompt("Enter new Publication Year:");
-    const isbn = prompt("Enter new ISBN:");
 
-    // 2. Simple validation - Title is usually required in your backend
-    if (!title) {
-        alert("Book Title is required for update.");
-        return;
-    }
 
-    const payload = {
-        title: title,
-        year: year ? parseInt(year) : null, // Convert to number if provided
-        isbn: isbn
+/* ========== DATA REFRESH & CRUD ========== */
+function refreshData() {
+    fetchBooks(currentPage);
+    fetchAuthors(currentAuthorPage);
+    loadDropdowns();
+}
+
+function saveBook() {
+    const id = document.getElementById("bookId").value;
+    const data = {
+        title: document.getElementById("bookTitle").value,
+        author_id: document.getElementById("bookAuthor").value,
+        year: document.getElementById("bookYear").value,
+        isbn: document.getElementById("bookIsbn").value
     };
+    if (!data.title || !data.author_id) return alert("Title and Author are required");
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/books/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("Book updated successfully!");
-            loadBooks(); // Refresh the table
-        } else {
-            alert("Update failed: " + (result.error || "Unknown error"));
-        }
-    } catch (err) {
-        console.error("Error updating book:", err);
-        alert("Failed to connect to the server.");
-    }
+    fetch(id ? `${API}/books/${id}` : `${API}/books`, {
+        method: id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    }).then(() => {
+        ["bookId", "bookTitle", "bookYear", "bookIsbn"].forEach(i => document.getElementById(i).value = "");
+        refreshData();
+    });
 }
 
-// --------- Refined Delete Book Function ---------
-async function deleteBook(id) {
-    if (confirm("Are you sure you want to delete this book?")) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/books/${id}`, { 
-                method: 'DELETE' 
-            });
+// ... include your existing saveAuthor, editBook/Author, and deleteBook/Author functions here ...
 
-            if (response.ok) {
-                alert("Book deleted successfully!");
-                loadBooks(); // Refresh the table
-            } else {
-                const result = await response.json();
-                alert("Error: " + result.error);
-            }
-        } catch (err) {
-            console.error("Error deleting book:", err);
+/* ========== SEARCH LOGIC ========== */
+async function filterBooks() {
+    const searchVal = document.getElementById('searchInput').value;
+    const sortVal = document.getElementById('sortSelect').value;
+    const [column, direction] = sortVal.split('-');
+    try {
+        const response = await fetch(`${API}/books/search-sort?search=${searchVal}&sort_by=${column}&order=${direction}`);
+        const data = await response.json();
+        if (data.books && data.books.length > 0) {
+            document.getElementById('noResultsMessage').classList.add('d-none');
+            renderBooksTable(data.books);
+            document.getElementById('pageInfo').innerText = "Search Results";
+            document.getElementById('prevBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+        } else {
+            document.getElementById('booksTable').innerHTML = '';
+            document.getElementById('noResultsMessage').classList.remove('d-none');
         }
-    }
+    } catch (err) { console.error("Search failed:", err); }
+}
+
+function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('noResultsMessage').classList.add('d-none');
+    fetchBooks(1);
 }

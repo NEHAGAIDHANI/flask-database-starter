@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Book Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    
+  <style>
+    
+    :root {
+        --ivory: #e8dcc4;     
+        --gold: #c5a059;      
+        --leather: #2c241e;   
+        --ink-bg: rgba(28, 22, 18, 0.95); 
+    }
+
+    body {
+        background-color: #2c241e; 
+        background-image: url('https://www.transparenttextures.com/patterns/dark-wood.png');
+        font-family: 'Crimson Text', serif;
+        color: var(--ivory);
+        margin: 0;
+        padding-bottom: 50px;
+    }
+
+    /* 1. Centered Header */
+    header {
+        text-align: center;
+        padding: 60px 0 40px;
+        background: rgba(0, 0, 0, 0.3);
+        margin-bottom: 60px;
+        border-bottom: 2px solid var(--gold);
+    }
+
+    header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5rem;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* 2. Equalize "Add Book" and "Add Author" Box Sizes */
+    .row.g-4 {
+        display: flex;
+        align-items: stretch; /* Forces columns in the same row to be equal height */
+    }
+
+    .management-card {
+        background: var(--ink-bg);
+        border: 1px solid var(--gold);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        margin-bottom: 30px;
+        height: 100%; /* Ensures card fills the equalized column height */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 3. SYMMETRICAL BUTTONS (Search & Cancel) */
+    .btn, .btn-add {
+        height: 48px; /* Force identical height */
+        min-width: 130px; /* Force identical minimum width */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        border-radius: 8px !important;
+        transition: 0.3s;
+        border: none;
+        margin-right: 12px !important;
+        padding: 0 20px !important;
+    }
+
+    /* Ensure Cancel keeps its color but matches shape */
+    .btn-secondary {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+
+    /* Space between buttons */
+    .btn:last-child {
+        margin-right: 0 !important;
+    }
+
+    /* Fix: Save Button at the bottom of the card */
+    .management-card .btn-add {
+        width: 100%;
+        margin-top: auto; /* Pushes button to bottom of the card */
+        margin-right: 0 !important;
+        background-color: #6366f1;
+        color: white;
+    }
+
+    /* 4. Form and Input Spacing */
+    .form-control, .form-select {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(197, 160, 89, 0.4) !important;
+        color: var(--ivory) !important;
+        margin-bottom: 20px !important;
+        height: 48px; /* Matches button height for a clean horizontal line */
+    }
+
+    textarea.form-control {
+        height: auto !important; /* Allow biography text area to grow */
+    }
+
+    /* 5. Table and Stat Cards (Fixing white background from image) */
+    .table { color: var(--ivory) !important; }
+    .table thead th { color: var(--gold) !important; border-bottom: 2px solid var(--gold) !important; }
+
+    .stat-card {
+        background: var(--ink-bg) !important; /* Changed from white to match theme */
+        border: 1px solid var(--gold);
+        color: var(--ivory) !important;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+    }
+    /* ================= BUTTON COLOR SYNC ================= */
+/* Save button color reference */
+.btn-add {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+/* Edit, Delete, Search, Cancel, Prev, Next */
+.btn,
+.btn-search,
+.btn-cancel,
+.btn-secondary,
+.btn-outline-warning {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+/* Hover state – same color, slightly darker */
+.btn:hover,
+.btn-search:hover,
+.btn-cancel:hover,
+.btn-secondary:hover,
+.btn-outline-warning:hover {
+    background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+}
+/* ================= INPUT TEXT VISIBILITY FIX ================= */
+
+/* Text inside inputs, selects, textarea */
+.form-control,
+.form-select,
+textarea {
+    color: #ffffff !important;
+}
+
+/* Placeholder text */
+.form-control::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Dropdown selected value */
+.form-select option {
+    color: #000000; /* dropdown list text */
+}
+
+/* Focus state (typing) */
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+    color: #ffffff !important;
+}
+/* ========== CENTER SEARCH & CANCEL IN MIDDLE OF SEARCH BAR ========== */
+
+/* Make the button column full width */
+.row:has(.search-btn-group) > div:has(.search-btn-group) {
+    flex: 0 0 100%;
+    max-width: 100%;
+    justify-content: center !important;
+    margin-top: 14px;
+}
+
+/* Center buttons */
+.search-btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+/* ========== ACTION BUTTON COLORS (TABLES) ========== */
+
+/* EDIT button (first button in Actions column) */
+.table tbody td:last-child .btn:first-child {
+    background-color: #22c55e !important;   /* green */
+    border-color: #22c55e !important;
+    color: #ffffff !important;
+}
+
+.table tbody td:last-child .btn:first-child:hover {
+    background-color: #16a34a !important;
+    border-color: #16a34a !important;
+}
+
+/* DELETE button (second button in Actions column) */
+.table tbody td:last-child .btn:last-child {
+    background-color: #ef4444 !important;   /* red */
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.table tbody td:last-child .btn:last-child:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+/* Container for the two top forms */
+.form-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+/* Mobile: Stack them */
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+@media (max-width: 768px) {
+  .form-container {
+    flex-direction: column;
+  }
+  
+  .card { 
+    width: 100%; /* Ensure forms take full width */
+  }
+}
+@media (max-width: 600px) {
+  /* Hide table headers */
+  table thead {
+    display: none;
+  }
+
+  table, table tbody, table tr, table td {
+    display: block;
+    width: 100%;
+  }
+
+  table tr {
+    margin-bottom: 15px;
+    border: 1px solid #cca43b; /* Match your gold border */
+  }
+
+  table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+/* Apply changes when the screen is smaller than 768px */
+@media screen and (max-width: 768px) {
+  /* Force side-by-side elements to stack */
+  .row-container { 
+    display: flex;
+    flex-direction: column; 
+  }
+
+  /* Ensure the table doesn't break the page width */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+  /* Add labels using data-attributes */
+  table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: 45%;
+    font-weight: bold;
+    text-align: left;
+  }
+}
+@media (max-width: 600px) {
+  /* Make buttons larger for touch */
+  .btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    width: 100%; /* Stack buttons */
+    margin-bottom: 8px;
+  }
+
+  /* Add more space between cards */
+  .card {
+    margin-bottom: 25px;
+    border-radius: 8px; /* Slightly softer corners for mobile */
+  }
+
+  /* Improve readability of the '6 Total Books' stats */
+  .stats-box {
+    padding: 20px;
+    font-size: 1.2rem;
+  }
+}
+
+
+
+
+
+    .stat-card h2 { color: var(--gold) !important; font-size: 3.5rem; margin: 0; }
+</style>
+
+</head>
+<body>
+
+<header>
+    <h1>📚 Book Management System</h1>
+    <p>Manage your library with ease</p>
+</header>
+
+<div class="container">
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="management-card">
+                <h2>📚 Add / Edit Book</h2>
+                <input type="hidden" id="bookId"> 
+                
+                <label>Title *</label>
+                <input id="bookTitle" class="form-control" placeholder="Enter book title">
+                
+                <label>Author *</label>
+                <select id="bookAuthor" class="form-select">
+                    <option value="">Select an author</option>
+                </select>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Publication Year</label>
+                        <input id="bookYear" class="form-control" placeholder="e.g., 2024">
+                    </div>
+                    <div class="col-md-6">
+                        <label>ISBN</label>
+                        <input id="bookIsbn" class="form-control" placeholder="e.g., 978-1234567890">
+                    </div>
+                </div>
+
+                <button class="btn-add" onclick="saveBook()">Save Book</button>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="management-card">
+                <h2>✍️ Add / Edit Author</h2>
+                <input type="hidden" id="authorId">
+
+                <label>Name *</label>
+                <input id="authorName" class="form-control" placeholder="Enter author name">
+
+                <label>City</label>
+                <input id="authorCity" class="form-control" placeholder="Author's city">
+
+                <label>Biography</label>
+                <textarea id="authorBio" class="form-control" rows="3" placeholder="Brief biography of the author"></textarea>
+
+                <button class="btn-add" onclick="saveAuthor()">Save Author</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="stat-card">
+    <h2 id="statBooks">0</h2>
+    <p>TOTAL BOOKS</p>
+</div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card">
+    <h2 id="statAuthors">0</h2>
+    <p>TOTAL AUTHORS</p>
+</div>
+        </div>
+    </div>
+<div class="management-card mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-7">
+            <label class="form-label">Search Directory</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by title or ISBN...">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Sort By</label>
+            <select id="sortSelect" class="form-control">
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+                <option value="year-desc">Newest First</option>
+                <option value="year-asc">Oldest First</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end justify-content-end pb-1">
+    <div class="search-btn-group">
+        <button class="btn btn-search" onclick="filterBooks()">Search</button>
+        <button class="btn btn-cancel" onclick="resetSearch()">Cancel</button>
+    </div>
+</div>
+    </div>
+</div>
+
+<div id="noResultsMessage" class="text-center py-3 d-none">
+    <h4 style="color: #c5a059;">⚠️ The book is not there</h4>
+</div>
+
+    <div class="management-card mb-4">
+        <h2>📚 Book Collection</h2>
+        <div class="table-responsive mt-4">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Year</th>
+                        <th>ISBN</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="booksTable"></tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+        <button id="prevBtn" class="btn btn-outline-warning btn-sm" onclick="changePage(-1)">Previous</button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button id="nextBtn" class="btn btn-outline-warning btn-sm" onclick="changePage(1)">Next</button>
+    </div>
+  
+    </div>
+   
+
+    <div class="management-card">
+    <h2>✍️ Author Registry</h2>
+    <div class="table-responsive mt-4">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="authorsTable"></tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <button id="prevAuthorBtn" class="btn btn-outline-warning btn-sm" onclick="changeAuthorPage(-1)">Previous</button>
+        <span id="authorPageInfo" style="color: var(--gold); font-weight: bold;">Page 1 of 1</span>
+        <button id="nextAuthorBtn" class="btn btn-outline-warning btn-sm" onclick="changeAuthorPage(1)">Next</button>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="code.js"></script>
+
+</body>
+</html>
