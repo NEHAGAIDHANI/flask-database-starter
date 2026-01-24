@@ -119,6 +119,68 @@ function renderAuthorsTable(authorsList) {
             </tr>`;
     });
 }
+function saveAuthor() {
+    const id = document.getElementById("authorId").value;
+    const data = {
+        name: document.getElementById("authorName").value,
+        city: document.getElementById("authorCity").value,
+        bio: document.getElementById("authorBio").value
+    };
+
+    if (!data.name) return alert("Author name is required");
+
+    fetch(id ? `${API}/authors/${id}` : `${API}/authors`, {
+        method: id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    }).then(() => {
+        // Clear form
+        ["authorId", "authorName", "authorCity", "authorBio"].forEach(i => document.getElementById(i).value = "");
+        refreshData();
+    });
+}
+// Fill the Book form with existing data
+function editBook(id, title, year, isbn, authorId) {
+    document.getElementById("bookId").value = id;
+    document.getElementById("bookTitle").value = title;
+    document.getElementById("bookYear").value = year;
+    document.getElementById("bookIsbn").value = isbn;
+    document.getElementById("bookAuthor").value = authorId;
+    
+    // Smooth scroll to top so the user sees the form is filled
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Fill the Author form with existing data
+function editAuthor(id, name, city, bio) {
+    document.getElementById("authorId").value = id;
+    document.getElementById("authorName").value = name;
+    document.getElementById("authorCity").value = city;
+    document.getElementById("authorBio").value = bio === 'undefined' ? '' : bio;
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+async function deleteBook(id) {
+    if (confirm("Are you sure you want to delete this book?")) {
+        try {
+            const res = await fetch(`${API}/books/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                refreshData(); // Reload tables and stats
+            }
+        } catch (err) { console.error("Delete book failed:", err); }
+    }
+}
+
+async function deleteAuthor(id) {
+    if (confirm("Warning: Deleting an author might affect books assigned to them. Proceed?")) {
+        try {
+            const res = await fetch(`${API}/authors/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                refreshData();
+            }
+        } catch (err) { console.error("Delete author failed:", err); }
+    }
+}
 function changeAuthorPage(step) {
     fetchAuthors(currentAuthorPage + step);
 }
