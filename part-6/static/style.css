@@ -1,0 +1,158 @@
+/* static/style.css */
+
+/* 1. Base Styles - Soft Minimalist Background */
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: #f8f7f2; /* Soft Cream/Greige */
+    color: #333533;
+    margin: 0;
+    padding: 50px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-weight: 300;
+    letter-spacing: -1px;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+}
+
+/* 2. Total Value Card */
+.stats-card {
+    background: #ffffff;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 1px solid #e8e6df;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+/* 3. Bright White Table Section */
+.container {
+    width: 100%;
+    max-width: 900px;
+    background: #ffffff; /* Bright White */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 20px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #a0a0a0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+td {
+    padding: 20px;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+/* 4. Beautiful Buttons */
+.btn-main {
+    background: #242423; /* Matte Black */
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-main:hover {
+    background: #cfdbd5; /* Soft Sage/Grey */
+    color: #242423;
+}
+
+/* static/style.css */
+
+.btn-clear {
+    text-decoration: none;
+    /* Default: Muted Slate Grey */
+    color: #8a817c; 
+    font-weight: 500;
+    padding: 8px 15px;
+    border: 1px solid #e8e6df;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Hover/Click State: Aesthetic Red (Terracotta) */
+.btn-clear:hover {
+    background-color: #fdf2f0; /* Very light red tint */
+    border-color: #e07a5f;     /* Terracotta Red border */
+    color: #e07a5f;            /* Terracotta Red text */
+}
+
+.btn-clear:active {
+    transform: scale(0.95);    /* Slight shrink effect when clicked */
+}
+.container {
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent */
+    backdrop-filter: blur(10px); /* Blurs the background behind the card */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+tr:hover {
+    background-color: #fafaf9 !important;
+    transition: background 0.2s ease;
+}
+
+/* Make the row look interactive */
+tr:hover td div {
+    background-color: #f8f7f2; /* Matches your aesthetic background on hover */
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+/* Ensure the table cell doesn't look messy with flex */
+td {
+    vertical-align: middle;
+}
+
+/* Action Links */
+.edit-btn {
+    color: #8a817c; /* Muted Bronze/Grey */
+    text-decoration: none;
+    font-weight: 600;
+    margin-right: 15px;
+}
+
+.delete-btn {
+    color: #e07a5f; /* Terracotta Red */
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* 5. Forms (Add & Edit) */
+.form-group {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    background: #fcfcfc;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-sizing: border-box;
+}

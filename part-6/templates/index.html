@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>Product Inventory</h1>
+
+    <div class="stats-card">
+        Total Value — ${{ "%.2f"|format(total_value) }}
+    </div>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+  <form action="/" method="GET" style="display: flex; gap: 10px; align-items: center;">
+    <input type="text" name="search" placeholder="Search item..." 
+           value="{{ request.args.get('search', '') }}" 
+           style="width: 200px; padding: 10px; border-radius: 8px; border: 1px solid #eee;">
+    
+    <button type="submit" class="btn-main">Search</button>
+
+    {% if request.args.get('search') %}
+        <a href="/" class="btn-clear">✕ Clear Search</a>
+    {% endif %}
+</form>
+            <a href="/add" class="btn-main">+ Add Product</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+    <tbody>
+    {% for product in products %}
+    <tr>
+        <td>{{ product.id }}</td>
+       <td style="padding: 20px; border-bottom: 1px solid #f9f9f9;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; background: #ffffff; border-radius: 10px; 
+                    display: flex; align-items: center; justify-content: center; 
+                    border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-size: 1.2rem;">
+            
+            {% set name_lower = product.name.lower() %}
+            
+            {% if 'laptop' in name_lower %} 💻
+            {% elif 'phone' in name_lower or 'mobile' in name_lower %} 📱
+            {% elif 'charger' in name_lower or 'cable' in name_lower %} 🔌
+            {% elif 'webcam' in name_lower or 'camera' in name_lower %} 📷
+            {% elif 'mouse' in name_lower %} 🖱️
+            {% elif 'keyboard' in name_lower %} ⌨️
+            {% elif 'airpod' in name_lower or 'earbud' in name_lower %} 🎧
+            {% elif 'earphone' in name_lower or 'headphone' in name_lower %} 🎧
+            {% elif 'watch' in name_lower %} ⌚
+            {% elif 'monitor' in name_lower or 'screen' in name_lower %} 🖥️
+            {% elif 'speaker' in name_lower %} 🔊
+            {% elif 'printer' in name_lower %} 🖨️
+            {% elif 'tablet' in name_lower or 'ipad' in name_lower %} 📲
+            {% else %} 📦 
+            {% endif %}
+        </div>
+
+        <span style="font-weight: 600; color: #333;">{{ product.name }}</span>
+    </div>
+</td>
+
+        <td>{{ product.quantity }}</td>
+        <td>${{ "%.2f"|format(product.price) }}</td>
+        <td>
+            <a href="/edit/{{ product.id }}" class="edit-btn">Edit</a>
+            <a href="/delete/{{ product.id }}" class="delete-btn" onclick="return confirm('Remove item?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+        </table>
+    </div>
+
+</body>
+</html>
