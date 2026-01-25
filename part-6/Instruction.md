@@ -4,9 +4,9 @@
 
 Build a **Product Inventory** application where you can:
 - View all products in a table
-- Add new products (name, quantity, price)
-- Delete products from inventory
-
+-  Delete products from inventory
+Add new products (name, quantity, price)
+-
 This homework combines everything you learned in Parts 1-5.
 
 ---

@@ -35,11 +35,10 @@ class Product(db.Model):
 # STEP 2: Create your routes here
 # =============================================================================
 
-# Route 1: Home page - display all products
-# Your code here...
 
 
-# Route 2: Add product page - form to add new product
+
+# Route 1: Add product page - form to add new product
 # Your code here...
 @app.route('/add', methods=['GET', 'POST'])
 def add_product():
@@ -55,7 +54,7 @@ def add_product():
     return render_template('add.html')
 
 
-# Route 3: Delete product
+# Route 2: Delete product
 # Your code here...
 @app.route('/delete/<int:id>')
 def delete_product(id):
@@ -76,6 +75,8 @@ def edit_product(id):
         return redirect(url_for('index'))
     return render_template('edit.html', product=product)
 
+# Route 4: Home page - display all products
+# Your code here...
 @app.route('/')
 def index():
     search_query = request.args.get('search')
